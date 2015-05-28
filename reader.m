@@ -8,14 +8,14 @@ a = textscan(fid, fmt, 'delimiter', ',',...
 %Transforming date into vectors to extract hour and day of week
 temp1 = datevec(a{1},'yyyy-mm-dd HH:MM:SS');
 [temp2, ~] = weekday(datenum(a{1},'yyyy-mm-dd HH:MM:SS'));
-A = [temp2 temp1(:,4) a{2}];
+A = [temp2 temp1(:,1:4) a{2}];
 
 %Changing the vars where weather==4 (only 3 data points)
-for i=1:size(A,1)
-    if A(i,6) == 4
-        A(i,6) = 3;
-    end
-end
+% for i=1:size(A,1)
+%     if A(i,9) == 4
+%         A(i,9) = 3;
+%     end
+% end
 
 fclose(fid);
 end

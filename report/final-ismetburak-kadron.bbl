@@ -1,0 +1,17 @@
+\begin{thebibliography}{HZDZ12}
+
+\bibitem[HZDZ12]{huang2012extreme}
+Guang-Bin Huang, Hongming Zhou, Xiaojian Ding, and Rui Zhang.
+\newblock Extreme learning machine for regression and multiclass
+  classification.
+\newblock {\em Systems, Man, and Cybernetics, Part B: Cybernetics, IEEE
+  Transactions on}, 42(2):513--529, 2012.
+
+\bibitem[HZS04]{huang2004extreme}
+Guang-Bin Huang, Qin-Yu Zhu, and Chee-Kheong Siew.
+\newblock Extreme learning machine: a new learning scheme of feedforward neural
+  networks.
+\newblock In {\em Neural Networks, 2004. Proceedings. 2004 IEEE International
+  Joint Conference on}, volume~2, pages 985--990. IEEE, 2004.
+
+\end{thebibliography}

@@ -1,0 +1,108 @@
+% !TEX TS-program = pdflatex
+% !TEX encoding = UTF-8 Unicode
+
+% This is a simple template for a LaTeX document using the "article" class.
+% See "book", "report", "letter" for other types of document.
+
+\documentclass[11pt]{article} % use larger type; default would be 10pt
+
+\usepackage[utf8]{inputenc} % set input encoding (not needed with XeLaTeX)
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{natbib}
+\usepackage{hyperref}
+
+%%% Examples of Article customizations
+% These packages are optional, depending whether you want the features they provide.
+% See the LaTeX Companion or other references for full information.
+
+%%% PAGE DIMENSIONS
+\usepackage{geometry} % to change the page dimensions
+\geometry{a4paper} % or letterpaper (US) or a5paper or....
+% \geometry{margin=2in} % for example, change the margins to 2 inches all round
+% \geometry{landscape} % set up the page for landscape
+%   read geometry.pdf for detailed page layout information
+
+\usepackage{graphicx} % support the \includegraphics command and options
+
+% \usepackage[parfill]{parskip} % Activate to begin paragraphs with an empty line rather than an indent
+
+%%% PACKAGES
+\usepackage{booktabs} % for much better looking tables
+\usepackage{array} % for better arrays (eg matrices) in maths
+\usepackage{paralist} % very flexible & customisable lists (eg. enumerate/itemize, etc.)
+\usepackage{verbatim} % adds environment for commenting out blocks of text & for better verbatim
+\usepackage{subfig} % make it possible to include more than one captioned figure/table in a single float
+% These packages are all incorporated in the memoir class to one degree or another...
+\usepackage{tikz}
+%%% HEADERS & FOOTERS
+\usepackage{fancyhdr} % This should be set AFTER setting up the page geometry
+\pagestyle{fancy} % options: empty , plain , fancy
+\renewcommand{\headrulewidth}{0pt} % customise the layout...
+\lhead{}\chead{}\rhead{}
+\lfoot{}\cfoot{\thepage}\rfoot{}
+
+%%% SECTION TITLE APPEARANCE
+\usepackage{sectsty}
+\allsectionsfont{\sffamily\mdseries\upshape} % (See the fntguide.pdf for font help)
+% (This matches ConTeXt defaults)
+
+%%% ToC (table of contents) APPEARANCE
+\usepackage[nottoc,notlof,notlot]{tocbibind} % Put the bibliography in the ToC
+\usepackage[titles,subfigure]{tocloft} % Alter the style of the Table of Contents
+\renewcommand{\cftsecfont}{\rmfamily\mdseries\upshape}
+\renewcommand{\cftsecpagefont}{\rmfamily\mdseries\upshape} % No bold!
+
+%%% The "real" document content comes below...
+
+\title{CMPE 482 - Final Project - Bike Sharing Prediction}
+\author{İsmet Burak Kadron}
+\date{\today} % Activate to display a given date or no date (if empty),
+         % otherwise the current date is printed 
+
+\newtheorem{theorem}{Theorem}
+
+\begin{document}
+\maketitle
+
+\section{Problem Statement}
+Our aim is to predict bicycle usage in Washington D.C's bike sharing system using previous data. Features are date, season, working day, holiday, weather indicator, temperature, apparent temperature (function of humidity and temperature), humidity. We have three usage outputs. First output indicates usage of casual (non-registered) users, second output indicates usage of registered users. The last one is total usage, sum of aforementioned outputs.
+
+\section{Proposed Solution}
+In the proposal, we proposed an Multilayer Perceptron (MLP) based solution as these are used for time-series data such as finance data. I tried to implement an MLP with 2 hidden layers but I encountered a bug that I couldn't fix. When I couldn't solve the problem, I switched to another MLP variant, Extreme Learning Machines. Extreme Learning Machines are similar to MLP with a single hidden layer but instead of backpropagation, weights of second layer are found analytically.
+
+ The idea is, instead of assigning all weights randomly and apply stochastic gradient descent, we assign input weights randomly and leave them as they are. Since hidden weights multiplied by hidden units should give us the outputs, we solve this problem using least square solution and Moore-Penrose inverse. We also regularize the inverse using Tikhonov regularization, so that overfitting does not happen. \cite{huang2004extreme},\cite{huang2012extreme}
+\[ 
+\begin{aligned}
+h_{i} &= f(\sum_{j}(w_{ij}x_{j}) + b_{i}); \\
+H &= f(WX + B); \qquad \text{(Obtaining hidden unit values in matrix form.)} \\
+Y &= HV; \qquad \text{(Formula for obtaining output in matrix form. Y and H are known.)} \\
+V &= (H^{T}H+ \Gamma^{T} \Gamma )^{-1}V^{T}Y \qquad \Gamma = \alpha I \qquad \text{($\alpha$ is the regularization constant.)}\\
+\end{aligned}
+\]
+As you can see by the formulas, V is found using least square solution. Psuedo inverse is regularized by Tikhonov regularization. The problem with this approach is all training data is trained at once with a single pass, so it needs a quite amount of memory according to the hyperparameters and size of training data.
+
+\section{Results}
+Our score was based on Root Mean Squared Logarithmic Error (RMSLE). It is calculated as
+\[
+\epsilon = \sqrt{\frac{1}{n}\sum_{i=1}^{n}(\log(p_{i}+1) - log(a_{i}+1))^2}
+\]
+Where $\epsilon$ is RMSLE value, $n$ is total number of data points, $p_{i}$ is our prediction, $a_{i}$ is actual value for $i$'th data point.
+
+As I understand, the ratio between prediction and actual values is more important rather than simple difference, so I trained the training data using logarithms of outputs and it performed better than my previous tries on the test set. It performed better and since logarithm lower bounded the outputs by 0, my predictions didn't have much fluctuations. 
+
+We use half of the data as training and other half as validation. Number of hidden units is $750$ and regularization constant is $0.1$. We train ELM in $9$ trials and take the average of test results for submission.
+
+Our final score on Kaggle is $0.99909$ with team name Kadron. It is performing better than Mean Value Benchmark which has score $1.58456$.
+
+\section{Future Work}
+In the future, we can compare these results with results obtained by SVM's and Decision Trees. This may also help us in a voting scheme by different trainers.
+
+We haven't modified features except to scale discrete features between 0-$n$. We can use feature extraction methods like PCA to obtain new features and use them in training.
+
+\bibliographystyle{alpha}
+\bibliography{ref}
+
+\end{document}
