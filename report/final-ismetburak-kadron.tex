@@ -67,13 +67,18 @@
 \begin{document}
 \maketitle
 
+\section{Introduction}
+In this report, we aim to explain how we predicted usage of Capital Bikeshare system using ELM's and previous usage data.
+
 \section{Problem Statement}
-Our aim is to predict bicycle usage in Washington D.C's bike sharing system using previous data. Features are date, season, working day, holiday, weather indicator, temperature, apparent temperature (function of humidity and temperature), humidity. We have three usage outputs. First output indicates usage of casual (non-registered) users, second output indicates usage of registered users. The last one is total usage, sum of aforementioned outputs.
+Our aim is to predict bicycle usage in Washington, D.C's bike sharing system using previous data. Features are date, season, working day, holiday, weather indicator, temperature, apparent temperature (function of humidity and temperature), humidity. We have three usage outputs. First output indicates usage of casual (non-registered) users, second output indicates usage of registered users. The last one is total usage, sum of aforementioned outputs. We also added day of week to the list of features as behaviours of people depend on this feature.
+
+Fanaee, et. al used this data in their publication and proposed an event labeling solution that has a probability of an event happening according to features and events happening on that day. They used 8 semi-supervised and 2 unsupervised learners to find the probability of an event happening. They used REPTree algorithm as semi-supervised learners, and used Google to find the events of the day and find the importance of that event (Hurricane Sandy, Independence Day, etc.). Their solution was performing well in terms of execution time but the accuracy dropped when compared to Radial Basis Functions (RBF's). We aimed to propose a new learner which is performing better in terms of accuracy. \cite{fanaee2014event}
 
 \section{Proposed Solution}
-In the proposal, we proposed an Multilayer Perceptron (MLP) based solution as these are used for time-series data such as finance data. I tried to implement an MLP with 2 hidden layers but I encountered a bug that I couldn't fix. When I couldn't solve the problem, I switched to another MLP variant, Extreme Learning Machines. Extreme Learning Machines are similar to MLP with a single hidden layer but instead of backpropagation, weights of second layer are found analytically.
+In the proposal, we proposed an Multilayer Perceptron (MLP) based solution as these are used for time-series data such as finance data. I tried to implement an MLP with 2 hidden layers but I encountered a bug that I couldn't fix. When I couldn't solve the problem, I switched to another MLP variant, Extreme Learning Machines(ELM). ELMs are similar to MLP with a single hidden layer but instead of backpropagation, weights of second layer are found analytically.
 
- The idea is, instead of assigning all weights randomly and apply stochastic gradient descent, we assign input weights randomly and leave them as they are. Since hidden weights multiplied by hidden units should give us the outputs, we solve this problem using least square solution and Moore-Penrose inverse. We also regularize the inverse using Tikhonov regularization, so that overfitting does not happen. \cite{huang2004extreme},\cite{huang2012extreme}
+The idea is, instead of assigning all weights randomly and applying stochastic gradient descent, we assign input weights randomly and leave them as they are. Since hidden weights multiplied by hidden units should give us the outputs, we solve this problem using least square solution and Moore-Penrose inverse. We also regularize the inverse using Tikhonov regularization, so that overfitting does not happen. \cite{huang2004extreme},\cite{huang2012extreme}
 \[ 
 \begin{aligned}
 h_{i} &= f(\sum_{j}(w_{ij}x_{j}) + b_{i}); \\
@@ -82,7 +87,7 @@ Y &= HV; \qquad \text{(Formula for obtaining output in matrix form. Y and H are 
 V &= (H^{T}H+ \Gamma^{T} \Gamma )^{-1}V^{T}Y \qquad \Gamma = \alpha I \qquad \text{($\alpha$ is the regularization constant.)}\\
 \end{aligned}
 \]
-As you can see by the formulas, V is found using least square solution. Psuedo inverse is regularized by Tikhonov regularization. The problem with this approach is all training data is trained at once with a single pass, so it needs a quite amount of memory according to the hyperparameters and size of training data.
+As you can see by the formulas, V is found using least square solution. Psuedo inverse is regularized by Tikhonov regularization. The problem with this approach is all training data is trained at once with a single pass, so memory usage is bound to number of hidden units and training data size.
 
 \section{Results}
 Our score was based on Root Mean Squared Logarithmic Error (RMSLE). It is calculated as
@@ -93,7 +98,7 @@ Where $\epsilon$ is RMSLE value, $n$ is total number of data points, $p_{i}$ is 
 
 As I understand, the ratio between prediction and actual values is more important rather than simple difference, so I trained the training data using logarithms of outputs and it performed better than my previous tries on the test set. It performed better and since logarithm lower bounded the outputs by 0, my predictions didn't have much fluctuations. 
 
-We use half of the data as training and other half as validation. Number of hidden units is $750$ and regularization constant is $0.1$. We train ELM in $9$ trials and take the average of test results for submission.
+We use half of the data as training and other half as validation. Number of hidden units is $750$ and regularization constant is $0.1$. We train ELM in $9$ trials and take the average of test results for submission. Execution time is between 10-15 seconds, so it is pretty fast in execution time as well.
 
 Our final score on Kaggle is $0.99909$ with team name Kadron. It is performing better than Mean Value Benchmark which has score $1.58456$.
 
@@ -101,6 +106,14 @@ Our final score on Kaggle is $0.99909$ with team name Kadron. It is performing b
 In the future, we can compare these results with results obtained by SVM's and Decision Trees. This may also help us in a voting scheme by different trainers.
 
 We haven't modified features except to scale discrete features between 0-$n$. We can use feature extraction methods like PCA to obtain new features and use them in training.
+
+As there are two different outputs, namely usage of casual and registered users, there can be different patterns of usage. We can train those outputs seperately and take the sum as the total usage metric.
+
+\section{Conclusion}
+We have proposed a solution that surpassed the benchmarks using a relatively new learner called Extreme Learning Machines. I think it is a very fast learner that could be useful in other applications as well. We couldn't complete our original proposal but ELM seems as an improvement over MLP's.
+
+\section{Acknowledgements}
+I would like to thank Heysem Kaya for letting me know ELM exists with his PhD dissertation and Ünsal Gökdağ for showing me how it works.
 
 \bibliographystyle{alpha}
 \bibliography{ref}
